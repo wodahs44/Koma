@@ -33,8 +33,10 @@ class StorageManager(
         .shareIn(scope, SharingStarted.Lazily, 1)
 
     init {
-        // KOMA: always use folderProvider.path() (scoped storage), ignore saved setting
-        baseDir = getBaseDir(folderProvider.path())
+        // KOMA: always use folderProvider.directory() (scoped storage), create if missing
+        val dirFile = folderProvider.directory()
+        dirFile.mkdirs()
+        baseDir = UniFile.fromFile(dirFile)
         baseDir?.let { parent ->
             parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
             parent.createDirectory(LOCAL_SOURCE_PATH)
