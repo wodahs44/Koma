@@ -11,18 +11,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
+import tachiyomi.core.common.storage.FolderProvider
 
 @Inject
 @SingleIn(AppScope::class)
 class StorageManager(
     private val context: Context,
     storagePreferences: StoragePreferences,
+    private val folderProvider: FolderProvider,
 ) {
 
     private val scope = CoroutineScope(Dispatchers.IO)
