@@ -13,6 +13,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.launch
 import tachiyomi.core.common.storage.FolderProvider
 
 @Inject
@@ -41,7 +42,8 @@ class StorageManager(
                 DiskUtil.createNoMediaFile(it, context)
             }
         }
-        _changes.send(Unit)
+        // KOMA: notify listeners (send is suspend, must run in coroutine)
+        scope.launch { _changes.send(Unit) }
     }
 
     private fun getBaseDir(uri: String): UniFile? {
