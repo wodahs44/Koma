@@ -27,28 +27,23 @@ class StorageManager(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    private var baseDir: UniFile? = getBaseDir(storagePreferences.baseStorageDirectory.get())
+    private var baseDir: UniFile? = getBaseDir(folderProvider.path())
 
     private val _changes: Channel<Unit> = Channel(Channel.UNLIMITED)
     val changes = _changes.receiveAsFlow()
         .shareIn(scope, SharingStarted.Lazily, 1)
 
     init {
-        storagePreferences.baseStorageDirectory.changes()
-            .drop(1)
-            .distinctUntilChanged()
-            .onEach { uri ->
-                baseDir = getBaseDir(uri)
-                baseDir?.let { parent ->
-                    parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
-                    parent.createDirectory(LOCAL_SOURCE_PATH)
-                    parent.createDirectory(DOWNLOADS_PATH).also {
-                        DiskUtil.createNoMediaFile(it, context)
-                    }
-                }
-                _changes.send(Unit)
+        // KOMA: always use folderProvider.path() (scoped storage), ignore saved setting
+        baseDir = getBaseDir(folderProvider.path())
+        baseDir?.let { parent ->
+            parent.createDirectory(AUTOMATIC_BACKUPS_PATH)
+            parent.createDirectory(LOCAL_SOURCE_PATH)
+            parent.createDirectory(DOWNLOADS_PATH).also {
+                DiskUtil.createNoMediaFile(it, context)
             }
-            .launchIn(scope)
+        }
+        _changes.send(Unit)
     }
 
     private fun getBaseDir(uri: String): UniFile? {
