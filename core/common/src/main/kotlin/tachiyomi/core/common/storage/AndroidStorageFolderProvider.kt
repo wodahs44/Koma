@@ -19,8 +19,15 @@ class AndroidStorageFolderProvider(
 ) : FolderProvider {
 
     override fun directory(): File {
+        // KOMA: Use app-specific external storage (scoped storage) instead of
+        // Environment.getExternalStorageDirectory() which is blocked on modern Android.
+        val dir = context.getExternalFilesDir(null)
+        if (dir != null) {
+            return File(dir, context.stringResource(MR.strings.app_name))
+        }
+        // Fallback to internal storage if external is unavailable
         return File(
-            Environment.getExternalStorageDirectory().absolutePath + File.separator +
+            context.filesDir.absolutePath + File.separator +
                 context.stringResource(MR.strings.app_name),
         )
     }
